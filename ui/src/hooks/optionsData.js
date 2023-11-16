@@ -9,6 +9,11 @@ export const useOptionsData = () => {
       try {
         const response = await fetch("http://localhost:8000/options");
         const data = await response.json();
+
+        // Sort the arrays in the alphabetical order
+        data.backends.sort();
+        data.pipelines.sort();
+
         setOptionData(data);
       } catch (error) {
         console.error("Error fetching options data:", error);

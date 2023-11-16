@@ -1,8 +1,16 @@
 import "./App.css";
 import { useState, useEffect } from "react";
 import { NavBar } from "./components/NavBar";
+import SelectPipelines from "./components/SelectPipelines";
 import { sampleRule } from "./constants/sampleData";
 import { useOptionsData } from "./hooks/optionsData";
+import { usePipelineContext } from "./context/PipelineContext";
+
+import Box from "@mui/material/Box";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 
 const App = () => {
   const [optionsLoading, optionData] = useOptionsData();
@@ -12,20 +20,27 @@ const App = () => {
   const [filteredFormats, setFilteredFormats] = useState([]);
   const [selectedFormat, setSelectedFormat] = useState("");
   useEffect(() => {
+    if (selectedBackend === "") {
+      setFilteredFormats([]);
+      return;
+    }
+
     if (optionData.formats) {
-      setFilteredFormats(
-        optionData.formats.filter(
-          (format) => format.backend === selectedBackend
-        )
+      const formats = optionData.formats.filter(
+        (format) => format.backend === selectedBackend
       );
+      formats.sort((a, b) => a.name - b.name);
+      setFilteredFormats(formats);
     }
   }, [selectedBackend, optionData]);
 
-  const [selectedPipelines, setSelectedPipelines] = useState([]);
+  const { chosenPipelines } = usePipelineContext([]);
 
   const [ruleData, setRuleData] = useState(sampleRule);
   const [pipelineData, setPipelaneData] = useState("");
   const [queryCode, setQueryCode] = useState("");
+
+  const [outputStatus, setOutputStatus] = useState("normal");
 
   const getQueryCode = async () => {
     const response = await fetch("http://localhost:8000/convert", {
@@ -36,19 +51,29 @@ const App = () => {
       body: JSON.stringify({
         rule: btoa(ruleData),
         pipelineYml: btoa(pipelineData),
-        pipeline: selectedPipelines,
+        pipeline: chosenPipelines,
         target: selectedBackend,
         format: selectedFormat,
       }),
     });
 
+    if (response.status === 500) {
+      setQueryCode(
+        "The pipelines select aren't valid for the selected backend-format pair."
+      );
+      setOutputStatus("error");
+      return;
+    }
+
     if (response.status !== 200) {
       const error = await response.text();
       setQueryCode(error);
+      setOutputStatus("error");
       return;
     }
 
     const data = await response.json();
+    setOutputStatus("success");
     if (typeof data.query === "string") setQueryCode(data.query);
     else setQueryCode(JSON.stringify(data.query, undefined, 4));
   };
@@ -66,77 +91,47 @@ const App = () => {
               {/* Conversion options selection */}
               <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-4 sm:p-4">
                 {/* Choose the backend */}
-                <div className="lg:px-1">
-                  <label htmlFor="select-backend" className="text-sigma-blue">
-                    Backend:
-                  </label>
-                  <select
-                    id="select-backend"
-                    className="select-sigma"
-                    autoComplete="off"
-                    value={selectedBackend}
-                    onChange={(e) => {
-                      setSelectedBackend(e.target.value);
-                    }}
-                  >
-                    {optionData.backends.map((backend) => (
-                      <option value={backend} key={backend}>
-                        {backend}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Box sx={{ minWidth: 120 }}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-backend-label">Backend</InputLabel>
+                    <Select
+                      labelId="select-backend-label"
+                      label="Backend"
+                      id="select-backend"
+                      value={selectedBackend}
+                      onChange={(e) => {
+                        setSelectedBackend(e.target.value);
+                      }}
+                    >
+                      {optionData.backends.map((backend) => (
+                        <MenuItem value={backend}>{backend}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
 
                 {/* Choose the format */}
-                <div className="lg:px-1">
-                  <label htmlFor="select-format" className="text-sigma-blue">
-                    Format:
-                  </label>
-                  <select
-                    id="select-format"
-                    className="select-sigma"
-                    autoComplete="off"
-                    value={selectedFormat}
-                    onChange={(e) => {
-                      setSelectedFormat(e.target.value);
-                    }}
-                  >
-                    {filteredFormats.map((format) => (
-                      <option value={format.name} key={format.name}>
-                        {format.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Box sx={{ minWidth: 120 }}>
+                  <FormControl fullWidth>
+                    <InputLabel id="select-format-label">Format</InputLabel>
+                    <Select
+                      labelId="select-format-label"
+                      label="Format"
+                      id="select-format"
+                      value={selectedFormat}
+                      onChange={(e) => {
+                        setSelectedFormat(e.target.value);
+                      }}
+                    >
+                      {filteredFormats.map((format) => (
+                        <MenuItem value={format.name}>{format.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
 
                 {/* Choose the pipeline */}
-                <div className="lg:px-1">
-                  <label htmlFor="select-pipeline" className="text-sigma-blue">
-                    Pipeline:
-                  </label>
-                  <select
-                    id="select-pipeline"
-                    className="select-sigma"
-                    placeholder="Select pipelines..."
-                    multiple
-                    autoComplete="off"
-                    value={selectedPipelines}
-                    onChange={(e) => {
-                      setSelectedPipelines(
-                        Array.from(
-                          e.target.selectedOptions,
-                          (option) => option.value
-                        )
-                      );
-                    }}
-                  >
-                    {optionData.pipelines.map((pipeline) => (
-                      <option value={pipeline} key={pipeline}>
-                        {pipeline}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SelectPipelines allPipelines={optionData.pipelines} />
               </div>
             </div>
           </div>
@@ -151,7 +146,7 @@ const App = () => {
                 htmlFor="rule-yml"
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Content for rule.yml
+                Content of rule.yml
               </label>
               <textarea
                 id="rule-yml"
@@ -168,7 +163,7 @@ const App = () => {
                 htmlFor="pipeline-yml"
                 className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Content for pipeline.yml
+                Content of pipeline.yml
               </label>
               <textarea
                 id="pipeline-yml"
