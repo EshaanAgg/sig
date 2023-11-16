@@ -5,13 +5,13 @@ new TomSelect("#select-backend", {
   labelField: "label",
   sortField: {
     field: "value",
-    direction: "asc"
-  }
+    direction: "asc",
+  },
 });
 new TomSelect("#select-format", {
   controlInput: null,
   valueField: "value",
-  labelField: "label"
+  labelField: "label",
 });
 new TomSelect("#select-pipeline", {
   allowEmptyOption: true,
@@ -20,7 +20,7 @@ new TomSelect("#select-pipeline", {
   hidePlaceholder: true,
   searchField: "value",
   valueField: "value",
-  labelField: "label"
+  labelField: "label",
 });
 
 // initial stuff todo when page is loaded
@@ -29,46 +29,50 @@ window.onload = function () {
   const fragment = window.location.hash.substring(1);
 
   // Split the hash into key-value pair strings
-  const pairs = fragment.split('&');
+  const pairs = fragment.split("&");
 
   // Parse each pair into a key and a value and store them in a map
   const urlParameter = new Map();
-  pairs.forEach(function(pair) {
-    const [key, value] = pair.split('=');
+  pairs.forEach(function (pair) {
+    const [key, value] = pair.split("=");
     // If both key and value are present, decode and store them
     if (key && value) {
       urlParameter.set(decodeURIComponent(key), decodeURIComponent(value));
     }
   });
-  
+
   // check if hideEditor parameter is in url
-  if(urlParameter.has('hideEditor')){
-    let hideEditor = urlParameter.get('hideEditor')
-    if(hideEditor == 1){
-      document.getElementById("rule-section").style.display = "none"
-      document.getElementById("rule-grid").setAttribute("class", "")
+  if (urlParameter.has("hideEditor")) {
+    let hideEditor = urlParameter.get("hideEditor");
+    if (hideEditor == 1) {
+      document.getElementById("rule-section").style.display = "none";
+      document.getElementById("rule-grid").setAttribute("class", "");
     }
   }
 
   // check if rule parameter is in url
-  if(urlParameter.has('rule')){
-    let rule = atob(urlParameter.get('rule'));
-    sigmaJar.updateCode(rule)
+  if (urlParameter.has("rule")) {
+    let rule = atob(urlParameter.get("rule"));
+    sigmaJar.updateCode(rule);
   }
 
   // check if pipelineYml parameter is in url
-  if(urlParameter.has('pipelineYml')){
-    let pipelineYml = atob(urlParameter.get('pipelineYml'));
-    pipelineJar.updateCode(pipelineYml)
+  if (urlParameter.has("pipelineYml")) {
+    let pipelineYml = atob(urlParameter.get("pipelineYml"));
+    pipelineJar.updateCode(pipelineYml);
   }
 
   let backendSelect = document.getElementById("select-backend");
   // get parameter backend from url and check if it's a valid option
-  if(urlParameter.has('backend') && backendSelect.querySelectorAll('option[value$="' + urlParameter.get('backend') + '"]').length > 0) {
+  if (
+    urlParameter.has("backend") &&
+    backendSelect.querySelectorAll(
+      'option[value$="' + urlParameter.get("backend") + '"]'
+    ).length > 0
+  ) {
     // select item in dropdown
-    backendSelect.tomselect.addItem(urlParameter.get('backend'));
-  }
-  else { 
+    backendSelect.tomselect.addItem(urlParameter.get("backend"));
+  } else {
     // select splunk backend as default
     backendSelect.tomselect.addItem("splunk");
   }
@@ -78,17 +82,17 @@ window.onload = function () {
 
   // get parameter format and select item in dropdown
   let formatSelect = document.getElementById("select-format");
-  if(urlParameter.has('format')) {
-    formatSelect.tomselect.addItem(urlParameter.get('format'));
+  if (urlParameter.has("format")) {
+    formatSelect.tomselect.addItem(urlParameter.get("format"));
   }
 
   // only show pipelines available for selected backend
   filterPipelineOptions();
 
   let pipelineSelect = document.getElementById("select-pipeline");
-  if(urlParameter.has('pipeline')) {
-    const pipelineValues = urlParameter.get('pipeline').split(';');
-    pipelineValues.forEach(function(value) {
+  if (urlParameter.has("pipeline")) {
+    const pipelineValues = urlParameter.get("pipeline").split(";");
+    pipelineValues.forEach(function (value) {
       pipelineSelect.tomselect.addItem(value);
     });
   }
@@ -131,30 +135,30 @@ document.getElementById("tab-pipeline").onclick = function () {
   showTab("tab-pipeline", "pipeline-code");
 };
 
-function showTab(tabId, codeId){
+function showTab(tabId, codeId) {
   var i, tabcontent, tablinks;
   var tab = document.getElementById(tabId);
   var code = document.getElementById(codeId);
-  
+
   // hide all code areas
   tabcontent = document.getElementsByClassName("tab-code");
   for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].classList.add('hidden');
+    tabcontent[i].classList.add("hidden");
   }
 
   // remove color from all tabs
   tablinks = document.getElementsByClassName("file-tab");
   for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].classList.remove('bg-sigma-blue');
-    tablinks[i].classList.remove('text-sigma-dark');
+    tablinks[i].classList.remove("bg-sigma-blue");
+    tablinks[i].classList.remove("text-sigma-dark");
   }
 
   // display the selected code area
-  code.parentElement.classList.remove('hidden');
+  code.parentElement.classList.remove("hidden");
 
   // change color of tab button to indicate selected code area
-  tab.classList.add('bg-sigma-blue');
-  tab.classList.add('text-sigma-dark');
+  tab.classList.add("bg-sigma-blue");
+  tab.classList.add("text-sigma-dark");
 }
 
 function generateShareLink() {
@@ -165,10 +169,20 @@ function generateShareLink() {
   let pipelineYml = encodeURIComponent(btoa(pipelineJar.toString()));
 
   // generate link with parameters
-  let shareParams =  "#backend=" + backend + "&format=" + format + "&pipeline=" + pipelines.join(";") + "&rule=" + rule + "&pipelineYml=" + pipelineYml;
+  let shareParams =
+    "#backend=" +
+    backend +
+    "&format=" +
+    format +
+    "&pipeline=" +
+    pipelines.join(";") +
+    "&rule=" +
+    rule +
+    "&pipelineYml=" +
+    pipelineYml;
   let shareUrl = location.protocol + "//" + location.host + "/" + shareParams;
   window.history.pushState({}, null, shareParams);
-  
+
   // copy link for sharing to clipboard
   navigator.clipboard.writeText(shareUrl);
 
@@ -222,7 +236,7 @@ function generateCli() {
     cliCommand = cliCommand + " -p " + e;
   });
 
-  if(pipelineJar.toString().length > 0){
+  if (pipelineJar.toString().length > 0) {
     cliCommand = cliCommand + " -p pipeline.yml";
   }
 
@@ -237,14 +251,14 @@ function convert(sigmaRule, customPipeline) {
   let backend = getSelectValue("select-backend");
   let format = getSelectValue("select-format");
   let pipelines = getSelectValue("select-pipeline");
-  
+
   // create json object
   const params = {
     rule: btoa(sigmaRule),
     pipelineYml: btoa(customPipeline),
     pipeline: pipelines,
     target: backend,
-    format: format
+    format: format,
   };
 
   // send post request
@@ -282,7 +296,7 @@ function filterFormatOptions() {
   options.forEach((option) => {
     tomSelect.addOption({
       label: option.label,
-      value: option.value
+      value: option.value,
     });
   });
   // select the first element
@@ -305,7 +319,7 @@ function filterPipelineOptions() {
   options.forEach((option) => {
     tomSelect.addOption({
       label: option.label,
-      value: option.value
+      value: option.value,
     });
   });
 }
