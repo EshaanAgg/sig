@@ -14,8 +14,8 @@ This is a simple `Flask` server which provides the simple endpoints which are re
 We will be using `poetry` for the version and dependancy management.
 
 ```bash
-poetry install
-poetry run ./run.py
+poetry install --no-root
+poetry run python ./run.py
 ```
 
 ### With Docker:

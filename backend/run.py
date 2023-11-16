@@ -20,12 +20,21 @@ pipelines_names = [p[0] for p in pipelines]
 
 
 @app.route("/")
-def home():
+def healthCheck():
+    return Response("The API is healthy and running!", status=200, mimetype="text/html")
+
+@app.route("/options", methods=["GET"])
+def getOptions():
     formats = []
+
     for backend in backends.keys():
         for name, description in plugins.backends[backend].formats.items():
             formats.append(
-                {"name": name, "description": description, "backend": backend}
+                {
+                    "name": name, 
+                    "description": description, 
+                    "backend": backend
+                }
             )
 
     for name, pipeline in pipelines:
@@ -34,27 +43,28 @@ def home():
         else:
             pipeline.backends = "all"
 
-    return render_template(
-        "index.html", backends=backends, pipelines=pipelines, formats=formats
-    )
+    return jsonify({
+        "backends": list(backends.keys()),
+        "pipelines": pipelines_names,
+        "formats": formats
+    })
 
 
-@app.route("/getpipelines", methods=["GET"])
-def get_pipelines():
+@app.route("/pipelines", methods=["GET"])
+def getPipelines():
     return jsonify(pipelines_names)
 
 
-@app.route("/sigma", methods=["POST"])
+@app.route("/convert", methods=["POST"])
 def convert():
-    # get params from request
     rule = str(base64.b64decode(request.json["rule"]), "utf-8")
-    # check if input is valid yaml
+    
+    # Check if input is valid YAML
     try:
         yaml.safe_load(rule)
     except:
-        print("error")
         return Response(
-            f"YamlError: Malformed yaml file", status=400, mimetype="text/html"
+            "YAMLError: Malformed YAML file", status=400, mimetype="text/html"
         )
 
     pipeline = []
@@ -69,7 +79,7 @@ def convert():
             template_pipeline = pipeline_generic.from_yaml(template)
         except:
             return Response(
-                f"YamlError: Malformed Pipeline Yaml", status=400, mimetype="text/html"
+                "YAMLError: Malformed Pipeline YAML", status=400, mimetype="text/html"
             )
 
     target = request.json["target"]
@@ -81,7 +91,7 @@ def convert():
     if isinstance(template_pipeline, ProcessingPipeline):
         processing_pipeline += template_pipeline
     else:
-        print("no processing pipeline")
+        print("No processing pipeline found")
 
     backend: Backend = backend_class(processing_pipeline=processing_pipeline)
 
@@ -97,4 +107,7 @@ def convert():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
+    app.run(
+        host="0.0.0.0", 
+        port=int(os.environ.get("PORT", 8000))
+    )

@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "sigconverter.io"
-version = "0.1.0"
-description = ""
-authors = ["magicsword <info@magicsword.io>"]
+name = "sig-backend"
+version = "0.0.1"
+description = "The backend API for Sig project."
+authors = ["EshaanAgg <eshaanagg@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

@@ -20,7 +20,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY poetry.lock pyproject.toml ./
-RUN poetry install
+RUN poetry install --no-root
 
 # Copy the flask app to the working directory
 COPY . /app
