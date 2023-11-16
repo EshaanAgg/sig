@@ -7,7 +7,7 @@ export const useOptionsData = () => {
   useEffect(() => {
     const fetchOptionsData = async () => {
       try {
-        const response = await fetch("https://localhost:8000/options");
+        const response = await fetch("http://localhost:8000/options");
         const data = await response.json();
         setOptionData(data);
       } catch (error) {

@@ -1,7 +1,8 @@
 import os
 import yaml
 import base64
-from flask import Flask, jsonify, render_template, request, Response
+from flask import Flask, jsonify, request, Response
+from flask_cors import CORS
 
 from sigma.conversion.base import Backend
 from sigma.plugins import InstalledSigmaPlugins
@@ -11,13 +12,14 @@ from sigma.processing import pipeline
 from sigma.processing.pipeline import ProcessingPipeline
 
 app = Flask(__name__)
+CORS(app)
+
 plugins = InstalledSigmaPlugins.autodiscover()
 pipeline_generic = pipeline.ProcessingPipeline()
 backends = plugins.backends
 pipeline_resolver = plugins.get_pipeline_resolver()
 pipelines = list(pipeline_resolver.list_pipelines())
 pipelines_names = [p[0] for p in pipelines]
-
 
 @app.route("/")
 def healthCheck():
@@ -103,7 +105,9 @@ def convert():
     except SigmaError as e:
         return Response(f"SigmaError: {str(e)}", status=400, mimetype="text/html")
 
-    return result
+    return jsonify({
+        "query": result
+    })
 
 
 if __name__ == "__main__":
