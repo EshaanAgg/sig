@@ -43,19 +43,22 @@ const App = () => {
   const [outputStatus, setOutputStatus] = useState("normal");
 
   const getQueryCode = async () => {
-    const response = await fetch("http://localhost:8000/convert", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        rule: btoa(ruleData),
-        pipelineYml: btoa(pipelineData),
-        pipeline: chosenPipelines,
-        target: selectedBackend,
-        format: selectedFormat,
-      }),
-    });
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_BASE_URL}/convert`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          rule: btoa(ruleData),
+          pipelineYml: btoa(pipelineData),
+          pipeline: chosenPipelines,
+          target: selectedBackend,
+          format: selectedFormat,
+        }),
+      }
+    );
 
     if (response.status === 500) {
       setQueryCode(
@@ -189,7 +192,7 @@ const App = () => {
               id="query-data"
               readOnly
               rows="20"
-              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               value={queryCode}
             />
           </div>
