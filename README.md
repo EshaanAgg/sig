@@ -5,17 +5,16 @@ This is a simple user-friendly converter for Sigma rules. This project is design
 ## 🌟 Key Features
 
 - Uses `MaterialUI` and `Tailwind` for styling
-- Uses `React Monaco Editor` to integrate live editing.
+- Uses `React Toast` to show notification badges
+- Uses `React Monaco Editor` to integrate live editing
 - Built in error handling with the help of `SIGMA`
 - Supports multiple backends through `pySigma`
 - Continuously updated to stay in sync with `pySigma`
 
 ## 🚀 Getting Started
 
-This project both has a [backend](./backend/) and [frontend](./ui/) component built on `Flask` and `React`. You can work on setting up both of them individually, or you can use `docker compose` directly.
+This project both has a [backend](./backend/) and [frontend](./ui/) component built on `Flask` and `React`. You can work on setting up both of them individually, or you can use [Docker Compose](https://docs.docker.com/compose/install/) directly.
 
 ### With Docker Compose
 
-```bash
-docker compose up
-```
+You can run `docker compose up` in the terminal. The backend server would become live at `http:localhost:8000` and the frontend UI at `http:localhost:3000`.

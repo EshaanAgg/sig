@@ -18,6 +18,7 @@ import Button from "@mui/material/Button";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 
 import { toast } from "react-toastify";
+import copy from "clipboard-copy";
 
 const App = () => {
   const [optionsLoading, optionData] = useOptionsData();
@@ -83,7 +84,7 @@ const App = () => {
 
     if (response.status === 500) {
       setQueryCode(
-        "The pipelines select aren't valid for the selected backend-format pair."
+        "Error: The pipelines you selected don't aren't valid for the selected backend-format pair. Please change the configuration and try again."
       );
       toast.error("There was an error in your request!");
       setOutputStatus("error");
@@ -93,7 +94,9 @@ const App = () => {
     if (response.status !== 200) {
       toast.error("There was an error in your request!");
       const error = await response.text();
-      setQueryCode(error);
+      setQueryCode(
+        `Error: The confguration you selected isn't (most probably) valid and thus caused our backend to crash. Here is the logged error so that you can debug the configuration better:\n\n${error}`
+      );
       setOutputStatus("error");
       return;
     }
@@ -111,8 +114,11 @@ const App = () => {
     <>
       <NavBar />
 
-      <div className="pb-4">
-        <div id="form-section" className="mx-10">
+      <div className="pb-">
+        <h1 class="mb-4 text-2xl font-bold leading-none tracking-tight text-gray-900 mx-10">
+          Configuration Settings
+        </h1>
+        <div className="mx-10 rounded-lg border bg-gray-50">
           <div className="grid lg:grid-cols-2 gap-4">
             <div className="lg:col-span-1 self-center">
               {/* Conversion options selection */}
@@ -180,13 +186,13 @@ const App = () => {
               <h1 class="mb-4 text-2xl font-bold leading-none tracking-tight text-gray-900">
                 Input Files
               </h1>
-              <div className="block p-2.5 w-full text-sm rounded-lg border bg-gray-50 ">
+              <div className="block p-2.5 w-full text-sm rounded-lg border bg-gray-50">
                 <RuleContent />
               </div>
             </div>
 
             {/* Generated query */}
-            <div className="lg:col-span-1 self-start lg:px-2">
+            <div className="lg:col-span-1 self-start lg:px-2 relative">
               <h1 class="mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900">
                 Generated Query
               </h1>
@@ -199,6 +205,18 @@ const App = () => {
                 className={`block p-2.5 w-full text-sm rounded-lg border bg-gray-50 focus:ring-blue-500 focus:border-blue-500 ${getQueryOutputStyle()}`}
                 value={queryCode}
               />
+
+              {/* Add the copy icon */}
+              <div className="absolute top-0 right-0 m-4 mt-12">
+                <button
+                  onClick={() => {
+                    copy(queryCode);
+                    toast.info("Copied to clipboard!");
+                  }}
+                >
+                  <i className="fa-regular fa-copy text-3xl border bg-white rounded-lg p-2"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
