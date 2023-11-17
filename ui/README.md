@@ -2,14 +2,23 @@
 
 This folder contains all the UI source code that is required to run the project. It is built with React.
 
-## Available Scripts
+## 🌟 Key Features
 
-In the project directory, you can run:
+- Uses `MaterialUI` and `Tailwind` for styling
+- Uses `React Monaco Editor` to integrate live editing.
 
-### `npm start`
+## 🚀 Getting Started
 
-Runs the app in the development mode. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Make sure that the backend is running on the port `8000` before you start to run this client. Also make a copy of the sample `.env` from the `.sample.env` by running the command `cp .sample.env .env`.
 
-### `npm run build`
+### Without Docker
 
-Builds the app for production to the `build` folder. It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Install the dependencies with `npm install`.
+2. To start the development server, run `npm start`.
+
+### With Docker
+
+```bash
+docker build -t sig-ui
+docker run -d -p 3000:3000 sig-ui
+```
