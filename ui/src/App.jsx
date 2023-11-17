@@ -1,16 +1,23 @@
 import "./App.css";
 import { useState, useEffect } from "react";
+
 import { NavBar } from "./components/NavBar";
 import SelectPipelines from "./components/SelectPipelines";
-import { sampleRule } from "./constants/sampleData";
+import RuleContent from "./components/RuleContent";
+
 import { useOptionsData } from "./hooks/optionsData";
 import { usePipelineContext } from "./context/PipelineContext";
+import { useFileContext } from "./context/FileContext";
 
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import Button from "@mui/material/Button";
+import { TextareaAutosize } from "@mui/base/TextareaAutosize";
+
+import { toast } from "react-toastify";
 
 const App = () => {
   const [optionsLoading, optionData] = useOptionsData();
@@ -35,14 +42,28 @@ const App = () => {
   }, [selectedBackend, optionData]);
 
   const { chosenPipelines } = usePipelineContext([]);
+  const { ruleData, pipelineData } = useFileContext();
 
-  const [ruleData, setRuleData] = useState(sampleRule);
-  const [pipelineData, setPipelaneData] = useState("");
   const [queryCode, setQueryCode] = useState("");
 
   const [outputStatus, setOutputStatus] = useState("normal");
+  const getQueryOutputStyle = () => {
+    if (outputStatus === "normal") return `text-gray-900 border-gray-300`;
+    else if (outputStatus === "error") return `text-red-900 border-red-300`;
+    else return `text-green-900 border-green-300`;
+  };
 
   const getQueryCode = async () => {
+    if (selectedBackend === "") {
+      toast.error("You must choose a backend to make the conversion!");
+      return;
+    }
+
+    if (selectedFormat === "") {
+      toast.error("You must choose a format to make the conversion!");
+      return;
+    }
+
     const response = await fetch(
       `${process.env.REACT_APP_BACKEND_BASE_URL}/convert`,
       {
@@ -64,19 +85,22 @@ const App = () => {
       setQueryCode(
         "The pipelines select aren't valid for the selected backend-format pair."
       );
+      toast.error("There was an error in your request!");
       setOutputStatus("error");
       return;
     }
 
     if (response.status !== 200) {
+      toast.error("There was an error in your request!");
       const error = await response.text();
       setQueryCode(error);
       setOutputStatus("error");
       return;
     }
 
-    const data = await response.json();
+    toast.success("Conversion was successful!");
     setOutputStatus("success");
+    const data = await response.json();
     if (typeof data.query === "string") setQueryCode(data.query);
     else setQueryCode(JSON.stringify(data.query, undefined, 4));
   };
@@ -87,8 +111,8 @@ const App = () => {
     <>
       <NavBar />
 
-      <div>
-        <div id="form-section" className="mx-10 py-2">
+      <div className="pb-4">
+        <div id="form-section" className="mx-10">
           <div className="grid lg:grid-cols-2 gap-4">
             <div className="lg:col-span-1 self-center">
               {/* Conversion options selection */}
@@ -107,7 +131,9 @@ const App = () => {
                       }}
                     >
                       {optionData.backends.map((backend) => (
-                        <MenuItem value={backend}>{backend}</MenuItem>
+                        <MenuItem value={backend} key={backend}>
+                          {backend}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -127,7 +153,9 @@ const App = () => {
                       }}
                     >
                       {filteredFormats.map((format) => (
-                        <MenuItem value={format.name}>{format.name}</MenuItem>
+                        <MenuItem value={format.name} key={format.name}>
+                          {format.name}
+                        </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -135,6 +163,11 @@ const App = () => {
 
                 {/* Choose the pipeline */}
                 <SelectPipelines allPipelines={optionData.pipelines} />
+
+                {/* Get Query button */}
+                <Button variant="contained" onClick={getQueryCode}>
+                  Get Query
+                </Button>
               </div>
             </div>
           </div>
@@ -143,58 +176,30 @@ const App = () => {
         {/* Inputs for rule.yml and pipeline.yml */}
         <div id="content-section" className="mx-10 mt-5">
           <div id="rule-grid" className="grid lg:grid-cols-2 gap-4">
-            <div id="rule-section" className="lg:col-span-1 self-start lg:px-2">
-              {/* Content for rule.yml */}
-              <label
-                htmlFor="rule-yml"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Content of rule.yml
-              </label>
-              <textarea
-                id="rule-yml"
-                rows="20"
-                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                value={ruleData}
-                onChange={(e) => {
-                  setRuleData(e.target.value);
-                }}
-              />
-
-              {/* Content for pipeline.yml */}
-              <label
-                htmlFor="pipeline-yml"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Content of pipeline.yml
-              </label>
-              <textarea
-                id="pipeline-yml"
-                rows="20"
-                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                value={pipelineData}
-                onChange={(e) => {
-                  setPipelaneData(e.target.value);
-                }}
-              />
+            <div className="lg:col-span-1 self-start lg:px-2">
+              <h1 class="mb-4 text-2xl font-bold leading-none tracking-tight text-gray-900">
+                Input Files
+              </h1>
+              <div className="block p-2.5 w-full text-sm rounded-lg border bg-gray-50 ">
+                <RuleContent />
+              </div>
             </div>
 
-            <button onClick={getQueryCode}>Get Query</button>
-
             {/* Generated query */}
-            <label
-              htmlFor="query-data"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Generated Query
-            </label>
-            <textarea
-              id="query-data"
-              readOnly
-              rows="20"
-              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              value={queryCode}
-            />
+            <div className="lg:col-span-1 self-start lg:px-2">
+              <h1 class="mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900">
+                Generated Query
+              </h1>
+
+              <TextareaAutosize
+                id="query-data"
+                readOnly
+                maxRows={28}
+                minRows={28}
+                className={`block p-2.5 w-full text-sm rounded-lg border bg-gray-50 focus:ring-blue-500 focus:border-blue-500 ${getQueryOutputStyle()}`}
+                value={queryCode}
+              />
+            </div>
           </div>
         </div>
       </div>

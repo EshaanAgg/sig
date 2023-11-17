@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -7,6 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
+
 import { usePipelineContext } from "../context/PipelineContext";
 
 const ITEM_HEIGHT = 48;
@@ -56,7 +58,7 @@ export default function SelectPipelines({ allPipelines }) {
           multiple
           value={chosenPipelines}
           onChange={handleChange}
-          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+          input={<OutlinedInput id="select-multiple-chip" label="Pipelines" />}
           renderValue={(selected) => (
             <Box
               sx={{

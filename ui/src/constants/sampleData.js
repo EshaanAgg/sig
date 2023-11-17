@@ -1,5 +1,4 @@
-export const sampleRule = `
-title: Suspicious SYSTEM User Process Creation
+export const sampleRule = `title: Suspicious SYSTEM User Process Creation
 id: 2617e7ed-adb7-40ba-b0f3-8f9945fe6c09
 status: test
 description: Detects a suspicious process creation as SYSTEM user (suspicious program or command line parameter)
@@ -72,5 +71,4 @@ falsepositives:
     - Administrative activity
     - Scripts and administrative tools used in the monitored environment
     - Monitoring activity
-level: high
-`;
+level: high`;
