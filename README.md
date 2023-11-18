@@ -17,4 +17,10 @@ This project both has a [backend](./backend/) and [frontend](./ui/) component bu
 
 ### With Docker Compose
 
+**Note**: Please make sure that the ports `3000` and `8000` are free on your system before proceeding as otherwise the docker images wouldn't be able to run.
+
 You can run `docker compose up` in the terminal. The backend server would become live at `http:localhost:8000` and the frontend UI at `http:localhost:3000`.
+
+## 📺 Video Demonstration
+
+https://github.com/EshaanAgg/Deno-GPT/assets/96648934/7d986b85-a3f4-4a3d-9713-bc55565c30a4

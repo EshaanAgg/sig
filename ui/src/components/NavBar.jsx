@@ -10,9 +10,9 @@ export const NavBar = () => {
             A simple SIGMA rule converter
           </p>
           <p className="text-md leading-none text-gray-700 max-w-3xl">
-            You can directly add your rules and pipelines in the in window
-            editor, and then select a backend and format to which you want to
-            convert to. You can even choose additional pipelines if you want to
+            You can directly add your rules and pipelines in the window editor,
+            and then select a backend and format to which you want to convert
+            to. You can even choose additional pipelines if you want to
             configure how the conversion happens.
           </p>
         </div>

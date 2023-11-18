@@ -86,8 +86,8 @@ export default function RuleContent() {
           language="yaml"
           value={ruleData}
           theme="vs-dark"
-          onChange={(e) => {
-            setRuleData(e.target.value);
+          onChange={(val) => {
+            setRuleData(val);
           }}
           options={{
             inlineSuggest: true,
@@ -105,8 +105,8 @@ export default function RuleContent() {
           language="yaml"
           value={pipelineData}
           theme="vs-dark"
-          onChange={(e) => {
-            setPipelaneData(e.target.value);
+          onChange={(val) => {
+            setPipelaneData(val);
           }}
           options={{
             inlineSuggest: true,
